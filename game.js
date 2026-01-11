@@ -1,59 +1,37 @@
-// =====================
 // DOM Elements
-// =====================
 const startScreen = document.getElementById('start-screen');
 const gameScreen = document.getElementById('game-screen');
 const endScreen = document.getElementById('end-screen');
 const finalScoreEl = document.getElementById('final-score');
-const canvas = document.getElementById('game-canvas');
-const ctx = canvas.getContext('2d');
 
-// =====================
-// Canvas Setup
-// =====================
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-// =====================
-// Assets
-// =====================
-const mouseImg = new Image();
-mouseImg.src = 'mouse.gif';
-
-const fatcatImg = new Image();
-fatcatImg.src = 'fatcat.gif';
-
-const cheeseImg = new Image();
-cheeseImg.src = 'cheese.gif';
+const mouseEl = document.getElementById('mouse');
+const fatcatEl = document.getElementById('fatcat');
+const cheeseEl = document.getElementById('cheese');
 
 const eatCheeseSound = new Audio('eat_cheese.mp3');
 const loseSound = new Audio('lose.mp3');
 const soundtrack = new Audio('soundtrack.mp3');
 soundtrack.loop = true;
-soundtrack.playbackRate = 2.0; // 200% speed
+soundtrack.playbackRate = 2.0;
 
-// Fix background paths
-document.querySelector('#start-screen .background').src = 'background_start.png';
-document.querySelector('#end-screen .background').src = 'background_end.png';
-
-// =====================
-// Game State
-// =====================
+// Game state
 let gameRunning = false;
 let score = 0;
 
-let mouse = { x: 100, y: 100, width: 80, height: 80, dx: 0 }; // slightly bigger
-let lastMouseX = mouse.x;
+// Positions
+let mouse = { x: 200, y: 200, width: 80, height: 80, dx: 0 };
+let fatcat = { x: 400, y: 300, width: 120, height: 120 };
+let cheese = null;
 
-let fatcat = { x: 400, y: 300, width: 120, height: 120 }; // bigger
-let cheese = null; // only one cheese at a time
+// Track last mouse position for flipping
+let lastMouseX = mouse.x;
 
 // =====================
 // Utility
 // =====================
 function getRandomPosition(objWidth, objHeight) {
-    const x = Math.random() * (canvas.width - objWidth);
-    const y = Math.random() * (canvas.height - objHeight);
+    const x = Math.random() * (window.innerWidth - objWidth);
+    const y = Math.random() * (window.innerHeight - objHeight);
     return { x, y };
 }
 
@@ -62,24 +40,23 @@ function getRandomPosition(objWidth, objHeight) {
 // =====================
 function startGame() {
     score = 0;
-    cheese = null;
-    mouse.x = canvas.width / 2;
-    mouse.y = canvas.height / 2;
+    mouse.x = window.innerWidth / 2;
+    mouse.y = window.innerHeight / 2;
     mouse.dx = 0;
     lastMouseX = mouse.x;
 
-    fatcat.x = Math.random() * canvas.width;
-    fatcat.y = Math.random() * canvas.height;
+    fatcat.x = Math.random() * window.innerWidth;
+    fatcat.y = Math.random() * window.innerHeight;
 
     startScreen.classList.add('hidden');
     endScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
 
+    spawnCheese();
     gameRunning = true;
     soundtrack.currentTime = 0;
     soundtrack.play();
 
-    spawnCheese();
     requestAnimationFrame(gameLoop);
 }
 
@@ -87,9 +64,11 @@ function startGame() {
 // Spawn Cheese
 // =====================
 function spawnCheese() {
-    if (!gameRunning) return;
-    const pos = getRandomPosition(60, 60); // slightly bigger
+    const pos = getRandomPosition(60, 60);
     cheese = { ...pos, width: 60, height: 60 };
+    cheeseEl.style.left = cheese.x + 'px';
+    cheeseEl.style.top = cheese.y + 'px';
+    cheeseEl.classList.remove('hidden');
 }
 
 // =====================
@@ -98,12 +77,25 @@ function spawnCheese() {
 function gameLoop() {
     if (!gameRunning) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // --- Mouse element ---
+    mouseEl.style.left = mouse.x + 'px';
+    mouseEl.style.top = mouse.y + 'px';
+    mouseEl.style.transform = mouse.dx < 0 ? 'scaleX(-1)' : 'scaleX(1)';
 
-    // --- Draw Cheese & check collision ---
+    // --- Fatcat movement ---
+    let dx = mouse.x - fatcat.x;
+    let dy = mouse.y - fatcat.y;
+    let dist = Math.sqrt(dx * dx + dy * dy);
+    let speed = 2 + Math.floor(score / 500) * 0.5;
+    fatcat.x += (dx / dist) * speed;
+    fatcat.y += (dy / dist) * speed;
+
+    fatcatEl.style.left = fatcat.x + 'px';
+    fatcatEl.style.top = fatcat.y + 'px';
+    fatcatEl.style.transform = dx < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+
+    // --- Cheese collision ---
     if (cheese) {
-        ctx.drawImage(cheeseImg, cheese.x, cheese.y, cheese.width, cheese.height);
-
         if (
             mouse.x < cheese.x + cheese.width &&
             mouse.x + mouse.width > cheese.x &&
@@ -113,41 +105,12 @@ function gameLoop() {
             score += 100;
             eatCheeseSound.currentTime = 0;
             eatCheeseSound.play();
-            spawnCheese(); // spawn new cheese immediately
+            cheeseEl.classList.add('hidden');
+            spawnCheese();
         }
     }
 
-    // --- Move Fatcat ---
-    let dx = mouse.x - fatcat.x;
-    let dy = mouse.y - fatcat.y;
-    let dist = Math.sqrt(dx * dx + dy * dy);
-    let speed = 2 + Math.floor(score / 500) * 0.5;
-    fatcat.x += (dx / dist) * speed;
-    fatcat.y += (dy / dist) * speed;
-
-    // --- Draw Fatcat ---
-    ctx.save();
-    if (dx < 0) { // moving left
-        ctx.translate(fatcat.x + fatcat.width / 2, fatcat.y + fatcat.height / 2);
-        ctx.scale(-1, 1);
-        ctx.drawImage(fatcatImg, -fatcat.width / 2, -fatcat.height / 2, fatcat.width, fatcat.height);
-    } else {
-        ctx.drawImage(fatcatImg, fatcat.x, fatcat.y, fatcat.width, fatcat.height);
-    }
-    ctx.restore();
-
-    // --- Draw Mouse ---
-    ctx.save();
-    if (mouse.dx < 0) { // moving left
-        ctx.translate(mouse.x + mouse.width / 2, mouse.y + mouse.height / 2);
-        ctx.scale(-1, 1);
-        ctx.drawImage(mouseImg, -mouse.width / 2, -mouse.height / 2, mouse.width, mouse.height);
-    } else {
-        ctx.drawImage(mouseImg, mouse.x, mouse.y, mouse.width, mouse.height);
-    }
-    ctx.restore();
-
-    // --- Collision with Fatcat ---
+    // --- Fatcat collision ---
     if (
         mouse.x < fatcat.x + fatcat.width &&
         mouse.x + mouse.width > fatcat.x &&
@@ -171,9 +134,9 @@ function endGame() {
     loseSound.play();
 
     finalScoreEl.textContent = score;
-
     gameScreen.classList.add('hidden');
     endScreen.classList.remove('hidden');
+    cheeseEl.classList.add('hidden');
 }
 
 // =====================
@@ -188,18 +151,19 @@ window.addEventListener('mousemove', (e) => {
 });
 
 // =====================
-// Start / Restart
+// Start / Restart with Space
 // =====================
 window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') {
-        if (!gameRunning) startGame();
-    }
+    if (e.code === 'Space' && !gameRunning) startGame();
 });
 
 // =====================
-// Resize
+// Handle Resize
 // =====================
 window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // Keep mouse/fatcat on screen
+    if (mouse.x + mouse.width > window.innerWidth) mouse.x = window.innerWidth - mouse.width;
+    if (mouse.y + mouse.height > window.innerHeight) mouse.y = window.innerHeight - mouse.height;
+    if (fatcat.x + fatcat.width > window.innerWidth) fatcat.x = window.innerWidth - fatcat.width;
+    if (fatcat.y + fatcat.height > window.innerHeight) fatcat.y = window.innerHeight - fatcat.height;
 });
