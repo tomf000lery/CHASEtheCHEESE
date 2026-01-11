@@ -63,8 +63,8 @@ function startGame() {
 // Spawn Cheese (only 1 at a time)
 function spawnCheese() {
     if (!gameRunning || cheese.active) return;
-    cheese.x = Math.random()*(canvas.width - 50);
-    cheese.y = Math.random()*(canvas.height - 50);
+    cheese.x = Math.random()*(canvas.width - 100);
+    cheese.y = Math.random()*(canvas.height - 100);
     cheese.active = true;
     cheeseEl.style.left = cheese.x + "px";
     cheeseEl.style.top = cheese.y + "px";
@@ -78,7 +78,9 @@ function gameLoop() {
     // Update Mouse position
     mouseEl.style.left = mouse.x + "px";
     mouseEl.style.top = mouse.y + "px";
-    mouseEl.style.transform = mouse.dx > 0 ? 'scaleX(1)' : 'scaleX(-1)'; // flip correctly
+
+    // Flip mouse horizontally based on movement (now correct)
+    mouseEl.style.transform = mouse.dx > 0 ? 'scaleX(1)' : 'scaleX(-1)';
 
     // Move Fatcat towards mouse
     let dx = mouse.x - fatcat.x;
@@ -90,14 +92,14 @@ function gameLoop() {
 
     fatcatEl.style.left = fatcat.x + "px";
     fatcatEl.style.top = fatcat.y + "px";
-    fatcatEl.style.transform = dx > 0 ? 'scaleX(1)' : 'scaleX(-1)'; // flip fatcat instantly
+    fatcatEl.style.transform = dx > 0 ? 'scaleX(1)' : 'scaleX(-1)'; // flip instantly
 
     // Check collision with cheese
     if (cheese.active &&
-        mouse.x < cheese.x + 50 &&
-        mouse.x + 50 > cheese.x &&
-        mouse.y < cheese.y + 50 &&
-        mouse.y + 50 > cheese.y) {
+        mouse.x < cheese.x + 100 &&
+        mouse.x + 100 > cheese.x &&
+        mouse.y < cheese.y + 100 &&
+        mouse.y + 100 > cheese.y) {
         score += 100;
         scoreboard.textContent = "CHEESE: " + score;
         eatCheeseSound.currentTime = 0;
@@ -109,10 +111,10 @@ function gameLoop() {
 
     // Check collision with fatcat
     if (
-        mouse.x < fatcat.x + 100 &&
-        mouse.x + 50 > fatcat.x &&
-        mouse.y < fatcat.y + 100 &&
-        mouse.y + 50 > fatcat.y
+        mouse.x < fatcat.x + 200 &&
+        mouse.x + 100 > fatcat.x &&
+        mouse.y < fatcat.y + 200 &&
+        mouse.y + 100 > fatcat.y
     ) {
         endGame();
         return;
@@ -139,8 +141,8 @@ window.addEventListener('mousemove', (e) => {
     if (!gameRunning) return;
     mouse.dx = e.clientX - mouse.x;
     mouse.dy = e.clientY - mouse.y;
-    mouse.x = e.clientX - 25;
-    mouse.y = e.clientY - 25;
+    mouse.x = e.clientX - 50; // adjusted for bigger mouse
+    mouse.y = e.clientY - 50;
 });
 
 // Start/restart with space
@@ -156,3 +158,4 @@ window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 });
+
