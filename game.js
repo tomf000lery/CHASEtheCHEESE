@@ -33,7 +33,7 @@ let gameRunning = false;
 let score = 0;
 
 // Mouse
-let mouse = { x: 100, y: 100, dx: 0, dy: 0, lastDirection: 1 }; // 1 = right, -1 = left
+let mouse = { x: 100, y: 100, dx: 0, dy: 0, lastDirection: -1 }; // -1 = left, 1 = right
 // Fatcat
 let fatcat = { x: 400, y: 300 };
 // Cheese
@@ -79,7 +79,7 @@ function startGame() {
 
     mouse.x = canvas.width / 2;
     mouse.y = canvas.height / 2;
-    mouse.lastDirection = 1;
+    mouse.lastDirection = -1; // start facing left
 
     fatcat.x = Math.random() * canvas.width;
     fatcat.y = Math.random() * canvas.height;
@@ -126,7 +126,7 @@ function gameLoop() {
         mouseEl.style.left = mouse.x + "px";
         mouseEl.style.top = mouse.y + "px";
 
-        // Persistent flip based on last horizontal direction
+        // Flip based on lastDirection only (persists until direction changes)
         mouseEl.style.transform = `scaleX(${mouse.lastDirection})`;
     }
 
@@ -203,9 +203,9 @@ window.addEventListener('mousemove', (e)=>{
     mouse.x = e.clientX - 50;
     mouse.y = e.clientY - 50;
 
-    // Update lastDirection based on movement
-    if (mouse.dx > 0) mouse.lastDirection = 1;  // right
-    else if (mouse.dx < 0) mouse.lastDirection = -1; // left
+    // Update lastDirection **only when moving left or right**
+    if (mouse.dx > 0) mouse.lastDirection = -1; // moving right, flip (since original gif faces left)
+    else if (mouse.dx < 0) mouse.lastDirection = 1; // moving left, flip back
 });
 
 // =====================
