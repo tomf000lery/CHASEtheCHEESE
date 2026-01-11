@@ -3,6 +3,7 @@ const startScreen = document.getElementById('start-screen');
 const gameScreen = document.getElementById('game-screen');
 const endScreen = document.getElementById('end-screen');
 const finalScoreEl = document.getElementById('final-score');
+const scoreboardEl = document.getElementById('scoreboard');
 
 const mouseEl = document.getElementById('mouse');
 const fatcatEl = document.getElementById('fatcat');
@@ -10,6 +11,7 @@ const cheeseEl = document.getElementById('cheese');
 
 const eatCheeseSound = new Audio('eat_cheese.mp3');
 const loseSound = new Audio('lose.mp3');
+const letsGoSound = new Audio('letsgo.mp3');
 const soundtrack = new Audio('soundtrack.mp3');
 soundtrack.loop = true;
 soundtrack.playbackRate = 2.0;
@@ -40,6 +42,7 @@ function getRandomPosition(objWidth, objHeight) {
 // =====================
 function startGame() {
     score = 0;
+    updateScore();
     mouse.x = window.innerWidth / 2;
     mouse.y = window.innerHeight / 2;
     mouse.dx = 0;
@@ -51,6 +54,9 @@ function startGame() {
     startScreen.classList.add('hidden');
     endScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
+
+    letsGoSound.currentTime = 0;
+    letsGoSound.play();
 
     spawnCheese();
     gameRunning = true;
@@ -72,6 +78,13 @@ function spawnCheese() {
 }
 
 // =====================
+// Update Score
+// =====================
+function updateScore() {
+    scoreboardEl.textContent = `SCORE: ${score}`;
+}
+
+// =====================
 // Game Loop
 // =====================
 function gameLoop() {
@@ -80,13 +93,14 @@ function gameLoop() {
     // --- Mouse element ---
     mouseEl.style.left = mouse.x + 'px';
     mouseEl.style.top = mouse.y + 'px';
-    mouseEl.style.transform = mouse.dx < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+    // Flip correctly (opposite of movement)
+    mouseEl.style.transform = mouse.dx > 0 ? 'scaleX(-1)' : 'scaleX(1)';
 
     // --- Fatcat movement ---
     let dx = mouse.x - fatcat.x;
     let dy = mouse.y - fatcat.y;
     let dist = Math.sqrt(dx * dx + dy * dy);
-    let speed = 2 + Math.floor(score / 500) * 0.5;
+    let speed = 2 + score / 500; // faster with more cheese
     fatcat.x += (dx / dist) * speed;
     fatcat.y += (dy / dist) * speed;
 
@@ -103,6 +117,7 @@ function gameLoop() {
             mouse.y + mouse.height > cheese.y
         ) {
             score += 100;
+            updateScore();
             eatCheeseSound.currentTime = 0;
             eatCheeseSound.play();
             cheeseEl.classList.add('hidden');
@@ -161,7 +176,6 @@ window.addEventListener('keydown', (e) => {
 // Handle Resize
 // =====================
 window.addEventListener('resize', () => {
-    // Keep mouse/fatcat on screen
     if (mouse.x + mouse.width > window.innerWidth) mouse.x = window.innerWidth - mouse.width;
     if (mouse.y + mouse.height > window.innerHeight) mouse.y = window.innerHeight - mouse.height;
     if (fatcat.x + fatcat.width > window.innerWidth) fatcat.x = window.innerWidth - fatcat.width;
