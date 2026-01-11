@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mouse Game</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div id="start-screen" class="screen">
+    <img src="assets/background_start.png" class="background">
+    <div class="text-box">
+        <h1>YOU ARE A MOUSE</h1>
+        <p>YOUR JOB IS TO COLLECT CHEESE<br>
+        YOU DON'T EVEN LIKE CHEESE<br>
+        BUT CHEESE IS ALL THERE IS<br>
+        or so you think</p>
+        <p>PRESS SPACE TO START</p>
+        <p>INSTRUCTIONS:<br>
+        USE MOUSE TO CONTROL MOUSE<br>
+        COLLECT CHEESE<br>
+        AVOID THE FAT CAT</p>
+    </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="game-screen" class="screen hidden">
+    <canvas id="game-canvas"></canvas>
+</div>
+
+<!-- END SCREEN -->
+<div id="end-screen" class="screen hidden">
+    <img src="assets/background_end.png" class="background">
+    <div class="text-box">
+        <h1>ALL YO CHEESE NOW BELONGS TO FAT TAX CAT MAX</h1>
+        <p>he probs gonna use it to fund wars that bomb children to that he can take their cheese too</p>
+        <p>CHEESE: <span id="final-score">0</span></p>
+        <p>PRESS SPACE TO RETURN TO RAT-I MEAN- MOUSE RACE</p>
+    </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
