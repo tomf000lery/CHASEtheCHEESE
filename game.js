@@ -34,12 +34,8 @@ canvas.height = window.innerHeight;
 // =====================
 let gameRunning = false;
 let score = 0;
-
-// Mouse
-let mouse = { x: 100, y: 100, dx: 0, dy: 0, lastDirection: 1 };
-// Fatcat
+let mouse = { x: 100, y: 100, lastDirection: 1 };
 let fatcat = { x: 400, y: 300 };
-// Cheese
 let cheese = { x: 0, y: 0, active: false };
 
 // =====================
@@ -73,7 +69,7 @@ function startGame() {
 }
 
 // =====================
-// Spawn Cheese (one at a time)
+// Spawn Cheese
 // =====================
 function spawnCheese() {
     if (!gameRunning || cheese.active) return;
@@ -93,35 +89,31 @@ function spawnCheese() {
 function gameLoop() {
     if (!gameRunning) return;
 
-    // --- Update Mouse ---
+    // Mouse
     mouseEl.style.left = mouse.x + "px";
     mouseEl.style.top = mouse.y + "px";
-    mouseEl.style.transform = `scaleX(${mouse.lastDirection})`; // flip persists
+    mouseEl.style.transform = `scaleX(${mouse.lastDirection})`;
 
-    // --- Move Fatcat ---
+    // Fatcat
     let dx = mouse.x - fatcat.x;
     let dy = mouse.y - fatcat.y;
     let dist = Math.sqrt(dx * dx + dy * dy);
     let speed = 2 + score / 500;
-
     if (dist !== 0) {
         fatcat.x += (dx / dist) * speed;
         fatcat.y += (dy / dist) * speed;
     }
-
     fatcatEl.style.left = fatcat.x + "px";
     fatcatEl.style.top = fatcat.y + "px";
     fatcatEl.style.transform = dx > 0 ? 'scaleX(1)' : 'scaleX(-1)';
 
-    // --- Check collision with cheese ---
-    const mousePadding = 20;
-    const cheesePadding = 10;
-
+    // Collision with cheese
+    const mPad = 20, cPad = 10;
     if (cheese.active &&
-        mouse.x + mousePadding < cheese.x + 100 - cheesePadding &&
-        mouse.x + 100 - mousePadding > cheese.x + cheesePadding &&
-        mouse.y + mousePadding < cheese.y + 100 - cheesePadding &&
-        mouse.y + 100 - mousePadding > cheese.y + cheesePadding
+        mouse.x + mPad < cheese.x + 100 - cPad &&
+        mouse.x + 100 - mPad > cheese.x + cPad &&
+        mouse.y + mPad < cheese.y + 100 - cPad &&
+        mouse.y + 100 - mPad > cheese.y + cPad
     ) {
         score += 100;
         scoreboard.textContent = "CHEESE: " + score;
@@ -132,13 +124,12 @@ function gameLoop() {
         spawnCheese();
     }
 
-    // --- Check collision with fatcat ---
-    const fatcatPadding = 30;
-    if (
-        mouse.x + mousePadding < fatcat.x + 200 - fatcatPadding &&
-        mouse.x + 100 - mousePadding > fatcat.x + fatcatPadding &&
-        mouse.y + mousePadding < fatcat.y + 200 - fatcatPadding &&
-        mouse.y + 100 - mousePadding > fatcat.y + fatcatPadding
+    // Collision with fatcat
+    const fPad = 30;
+    if (mouse.x + mPad < fatcat.x + 200 - fPad &&
+        mouse.x + 100 - mPad > fatcat.x + fPad &&
+        mouse.y + mPad < fatcat.y + 200 - fPad &&
+        mouse.y + 100 - mPad > fatcat.y + fPad
     ) {
         endGame();
         return;
@@ -155,7 +146,6 @@ function endGame() {
     soundtrack.pause();
     loseSound.currentTime = 0;
     loseSound.play();
-
     finalScoreEl.textContent = score;
 
     gameScreen.classList.add('hidden');
@@ -167,15 +157,11 @@ function endGame() {
 // =====================
 window.addEventListener('mousemove', (e) => {
     if (!gameRunning) return;
-
     let dx = e.clientX - (mouse.x + 50);
-
     mouse.x = e.clientX - 50;
     mouse.y = e.clientY - 50;
-
-    // Only flip when moving right or left, persists until changed
-    if (dx > 0) mouse.lastDirection = -1; // moving right → flip horizontally
-    else if (dx < 0) mouse.lastDirection = 1; // moving left → default
+    if (dx > 0) mouse.lastDirection = -1; // right → flipped
+    else if (dx < 0) mouse.lastDirection = 1; // left → default
 });
 
 // =====================
@@ -190,7 +176,7 @@ window.addEventListener('keydown', (e) => {
 });
 
 // =====================
-// Handle Window Resize
+// Resize
 // =====================
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
