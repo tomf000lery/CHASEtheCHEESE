@@ -10,10 +10,9 @@ body, html {
     height: 100%;
     overflow: hidden;
     background: black;
-    font-family: Arial, sans-serif;
 }
 
-/* Screen layout */
+/* Screens */
 .screen {
     position: absolute;
     width: 100%;
@@ -44,9 +43,20 @@ body, html {
 
 #end-screen .text-box {
     color: white;
+    font-family: Arial, sans-serif;
     text-align: center;
     text-shadow: 2px 2px 8px black;
     max-width: 800px;
+}
+
+#scoreboard {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: orange;
+    font-family: Helvetica, sans-serif;
+    text-shadow: 2px 2px 8px black;
+    font-size: 24px;
 }
 
 /* Hidden class */
@@ -54,22 +64,26 @@ body, html {
     display: none;
 }
 
-/* Sprites (mouse, fatcat, cheese) */
+/* Sprites */
 .sprite {
     position: absolute;
     width: auto;
     height: auto;
-    max-width: 100px; /* adjust size for quality */
+    max-width: 100px;
     max-height: 100px;
     transform-origin: center;
-    transition: transform 0.1s linear; /* smooth flipping */
+}
+
+/* Game background */
+#game-screen {
+    background-color: #fff7d6; /* light beige/yellow */
 }
 
 /* Responsive text */
 @media (max-width: 600px) {
     #start-screen .text-box,
-    #end-screen .text-box {
+    #end-screen .text-box,
+    #scoreboard {
         font-size: 14px;
-        max-width: 90%;
     }
 }
