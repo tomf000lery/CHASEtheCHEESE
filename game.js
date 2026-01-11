@@ -32,9 +32,9 @@ const soundtrack = new Audio('soundtrack.mp3');
 soundtrack.loop = true;
 soundtrack.playbackRate = 2.0; // 200% speed
 
-// Start / End screen backgrounds
+// Fix background paths
 document.querySelector('#start-screen .background').src = 'background_start.png';
-document.querySelector('#end-screen .background').src = 'xbackground_end.png';
+document.querySelector('#end-screen .background').src = 'background_end.png';
 
 // =====================
 // Game State
@@ -42,18 +42,18 @@ document.querySelector('#end-screen .background').src = 'xbackground_end.png';
 let gameRunning = false;
 let score = 0;
 
-let mouse = { x: 100, y: 100, width: 50, height: 50, dx: 0 };
+let mouse = { x: 100, y: 100, width: 80, height: 80, dx: 0 }; // slightly bigger
 let lastMouseX = mouse.x;
 
-let fatcat = { x: 400, y: 300, width: 80, height: 80 };
-let cheeseArray = [];
+let fatcat = { x: 400, y: 300, width: 120, height: 120 }; // bigger
+let cheese = null; // only one cheese at a time
 
 // =====================
-// Utility Functions
+// Utility
 // =====================
-function getRandomPosition() {
-    const x = Math.random() * (canvas.width - 50);
-    const y = Math.random() * (canvas.height - 50);
+function getRandomPosition(objWidth, objHeight) {
+    const x = Math.random() * (canvas.width - objWidth);
+    const y = Math.random() * (canvas.height - objHeight);
     return { x, y };
 }
 
@@ -62,7 +62,7 @@ function getRandomPosition() {
 // =====================
 function startGame() {
     score = 0;
-    cheeseArray = [];
+    cheese = null;
     mouse.x = canvas.width / 2;
     mouse.y = canvas.height / 2;
     mouse.dx = 0;
@@ -88,9 +88,8 @@ function startGame() {
 // =====================
 function spawnCheese() {
     if (!gameRunning) return;
-    const pos = getRandomPosition();
-    cheeseArray.push({ ...pos, width: 40, height: 40 });
-    setTimeout(spawnCheese, 2000); // spawn every 2 seconds
+    const pos = getRandomPosition(60, 60); // slightly bigger
+    cheese = { ...pos, width: 60, height: 60 };
 }
 
 // =====================
@@ -98,10 +97,11 @@ function spawnCheese() {
 // =====================
 function gameLoop() {
     if (!gameRunning) return;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // --- Draw Cheese & check collisions ---
-    cheeseArray.forEach((cheese, index) => {
+    // --- Draw Cheese & check collision ---
+    if (cheese) {
         ctx.drawImage(cheeseImg, cheese.x, cheese.y, cheese.width, cheese.height);
 
         if (
@@ -110,26 +110,22 @@ function gameLoop() {
             mouse.y < cheese.y + cheese.height &&
             mouse.y + mouse.height > cheese.y
         ) {
-            cheeseArray.splice(index, 1);
             score += 100;
             eatCheeseSound.currentTime = 0;
             eatCheeseSound.play();
+            spawnCheese(); // spawn new cheese immediately
         }
-    });
+    }
 
-    // --- Move Fatcat towards mouse ---
+    // --- Move Fatcat ---
     let dx = mouse.x - fatcat.x;
     let dy = mouse.y - fatcat.y;
     let dist = Math.sqrt(dx * dx + dy * dy);
-
-    // Base speed + increases with score
-    let baseSpeed = 2;
-    let speed = baseSpeed + Math.floor(score / 500) * 0.5;
-
+    let speed = 2 + Math.floor(score / 500) * 0.5;
     fatcat.x += (dx / dist) * speed;
     fatcat.y += (dy / dist) * speed;
 
-    // --- Draw Fatcat with flipping ---
+    // --- Draw Fatcat ---
     ctx.save();
     if (dx < 0) { // moving left
         ctx.translate(fatcat.x + fatcat.width / 2, fatcat.y + fatcat.height / 2);
@@ -140,7 +136,7 @@ function gameLoop() {
     }
     ctx.restore();
 
-    // --- Draw Mouse with flipping ---
+    // --- Draw Mouse ---
     ctx.save();
     if (mouse.dx < 0) { // moving left
         ctx.translate(mouse.x + mouse.width / 2, mouse.y + mouse.height / 2);
@@ -151,7 +147,7 @@ function gameLoop() {
     }
     ctx.restore();
 
-    // --- Check collision with Fatcat ---
+    // --- Collision with Fatcat ---
     if (
         mouse.x < fatcat.x + fatcat.width &&
         mouse.x + mouse.width > fatcat.x &&
@@ -192,17 +188,16 @@ window.addEventListener('mousemove', (e) => {
 });
 
 // =====================
-// Start & Restart with Space
+// Start / Restart
 // =====================
 window.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
-        if (startScreen.classList.contains('hidden') && endScreen.classList.contains('hidden')) return;
-        startGame();
+        if (!gameRunning) startGame();
     }
 });
 
 // =====================
-// Handle Window Resize
+// Resize
 // =====================
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
