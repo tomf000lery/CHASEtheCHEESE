@@ -44,11 +44,12 @@ body, html {
 
 /* End screen text */
 #end-screen .text-box {
-    color: #00e2f9; /* updated color */
+    color: #00e2f9;
     font-family: Arial, sans-serif;
     text-align: center;
     text-shadow: 2px 2px 8px black;
     max-width: 800px;
+    margin-top: -40px; /* move text up slightly */
 }
 
 /* Scoreboard */
@@ -96,3 +97,4 @@ canvas {
         font-size: 14px;
     }
 }
+
