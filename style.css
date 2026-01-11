@@ -49,8 +49,19 @@ body, html {
     text-align: center;
     text-shadow: 2px 2px 8px black;
     max-width: 800px;
-    margin-top: -40px; /* move text slightly up */
+    margin-top: -60px; /* move text up slightly more */
+
+    /* Prevent first line from wrapping */
+    white-space: nowrap;
 }
+
+/* Only force wrapping for the other lines */
+#end-screen .text-box p {
+    white-space: normal;
+    margin-top: 10px; /* spacing between paragraphs */
+    line-height: 1.4;
+}
+
 
 /* Scoreboard */
 #scoreboard {
