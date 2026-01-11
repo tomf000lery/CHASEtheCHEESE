@@ -21,8 +21,8 @@ let gameRunning = false;
 let score = 0;
 
 // Positions
-let mouse = { x: 200, y: 200, width: 80, height: 80, dx: 0 };
-let fatcat = { x: 400, y: 300, width: 120, height: 120 };
+let mouse = { x: 200, y: 200, width: 60, height: 60, dx: 0 };
+let fatcat = { x: 400, y: 300, width: 140, height: 140 };
 let cheese = null;
 
 // Track last mouse position for flipping
@@ -94,7 +94,7 @@ function gameLoop() {
     mouseEl.style.left = mouse.x + 'px';
     mouseEl.style.top = mouse.y + 'px';
     // Flip correctly (opposite of movement)
-    mouseEl.style.transform = mouse.dx > 0 ? 'scaleX(-1)' : 'scaleX(1)';
+    mouseEl.style.transform = mouse.dx < 0 ? 'scaleX(-1)' : 'scaleX(1)';
 
     // --- Fatcat movement ---
     let dx = mouse.x - fatcat.x;
@@ -106,7 +106,7 @@ function gameLoop() {
 
     fatcatEl.style.left = fatcat.x + 'px';
     fatcatEl.style.top = fatcat.y + 'px';
-    fatcatEl.style.transform = dx < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+    fatcatEl.style.transform = dx > 0 ? 'scaleX(-1)' : 'scaleX(1)';
 
     // --- Cheese collision ---
     if (cheese) {
