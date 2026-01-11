@@ -1,4 +1,4 @@
-/* Reset */
+/* Reset and hide cursor */
 * {
     margin: 0;
     padding: 0;
@@ -10,6 +10,7 @@ body, html {
     height: 100%;
     overflow: hidden;
     background: black;
+    cursor: none; /* hide the computer mouse cursor */
 }
 
 /* Screens */
@@ -69,9 +70,20 @@ body, html {
     position: absolute;
     width: auto;
     height: auto;
-    max-width: 100px;
-    max-height: 100px;
-    transform-origin: center;
+}
+
+/* Specific sprite sizes */
+#mouse {
+    width: 60px;  /* smaller */
+    height: 60px;
+}
+#fatcat {
+    width: 140px; /* bigger */
+    height: 140px;
+}
+#cheese {
+    width: 60px;
+    height: 60px;
 }
 
 /* Game background */
