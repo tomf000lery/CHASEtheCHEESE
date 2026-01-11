@@ -93,8 +93,8 @@ function gameLoop() {
     // --- Mouse element ---
     mouseEl.style.left = mouse.x + 'px';
     mouseEl.style.top = mouse.y + 'px';
-    // Flip correctly (opposite of movement)
-    mouseEl.style.transform = mouse.dx < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+    // FIXED FLIP: mouse faces the **direction it moves**
+    mouseEl.style.transform = mouse.dx > 0 ? 'scaleX(1)' : 'scaleX(-1)';
 
     // --- Fatcat movement ---
     let dx = mouse.x - fatcat.x;
@@ -106,7 +106,7 @@ function gameLoop() {
 
     fatcatEl.style.left = fatcat.x + 'px';
     fatcatEl.style.top = fatcat.y + 'px';
-    fatcatEl.style.transform = dx > 0 ? 'scaleX(-1)' : 'scaleX(1)';
+    fatcatEl.style.transform = dx < 0 ? 'scaleX(1)' : 'scaleX(-1)';
 
     // --- Cheese collision ---
     if (cheese) {
