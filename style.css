@@ -42,7 +42,7 @@ body, html {
     max-width: 800px;
 }
 
-/* End screen text (new color) */
+/* End screen text */
 #end-screen .text-box {
     color: #00e2f9; /* updated color */
     font-family: Arial, sans-serif;
@@ -87,7 +87,6 @@ canvas {
     height: 100%;
     background: #fff8dc; /* light beige */
 }
-
 
 /* Responsive text */
 @media (max-width: 600px) {
