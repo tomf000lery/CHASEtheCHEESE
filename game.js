@@ -9,6 +9,10 @@ const scoreboard = document.getElementById('scoreboard');
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 
+const mouseEl = document.getElementById('mouse');
+const fatcatEl = document.getElementById('fatcat');
+const cheeseEl = document.getElementById('cheese');
+
 // =====================
 // Audio
 // =====================
@@ -39,18 +43,11 @@ let fatcat = { x: 400, y: 300 };
 let cheese = { x: 0, y: 0, active: false };
 
 // =====================
-// Entities (GIFs as <img>)
-// =====================
-let mouseEl = document.getElementById('mouse');
-let fatcatEl = document.getElementById('fatcat');
-let cheeseEl = document.getElementById('cheese');
-
-// =====================
 // Start Game
 // =====================
 function startGame() {
     score = 0;
-    if (scoreboard) scoreboard.textContent = "CHEESE: 0";
+    scoreboard.textContent = "CHEESE: 0";
 
     mouse.x = canvas.width / 2 - 50;
     mouse.y = canvas.height / 2 - 50;
@@ -60,7 +57,7 @@ function startGame() {
     fatcat.y = Math.random() * (canvas.height - 200);
 
     cheese.active = false;
-    if (cheeseEl) cheeseEl.classList.add('hidden');
+    cheeseEl.classList.add('hidden');
 
     startScreen.classList.add('hidden');
     endScreen.classList.add('hidden');
@@ -76,7 +73,7 @@ function startGame() {
 }
 
 // =====================
-// Spawn Cheese
+// Spawn Cheese (one at a time)
 // =====================
 function spawnCheese() {
     if (!gameRunning || cheese.active) return;
@@ -85,11 +82,9 @@ function spawnCheese() {
     cheese.y = Math.random() * (canvas.height - 100);
     cheese.active = true;
 
-    if (cheeseEl) {
-        cheeseEl.style.left = cheese.x + "px";
-        cheeseEl.style.top = cheese.y + "px";
-        cheeseEl.classList.remove('hidden');
-    }
+    cheeseEl.style.left = cheese.x + "px";
+    cheeseEl.style.top = cheese.y + "px";
+    cheeseEl.classList.remove('hidden');
 }
 
 // =====================
@@ -99,50 +94,45 @@ function gameLoop() {
     if (!gameRunning) return;
 
     // --- Update Mouse ---
-    if (mouseEl) {
-        mouseEl.style.left = mouse.x + "px";
-        mouseEl.style.top = mouse.y + "px";
-        mouseEl.style.transform = `scaleX(${mouse.lastDirection})`; // flip persists
-    }
+    mouseEl.style.left = mouse.x + "px";
+    mouseEl.style.top = mouse.y + "px";
+    mouseEl.style.transform = `scaleX(${mouse.lastDirection})`; // flip persists
 
-    // --- Move Fatcat towards mouse ---
+    // --- Move Fatcat ---
     let dx = mouse.x - fatcat.x;
     let dy = mouse.y - fatcat.y;
     let dist = Math.sqrt(dx * dx + dy * dy);
-    let speed = 2 + score / 500; // faster with more cheese
+    let speed = 2 + score / 500;
+
     if (dist !== 0) {
         fatcat.x += (dx / dist) * speed;
         fatcat.y += (dy / dist) * speed;
     }
 
-    if (fatcatEl) {
-        fatcatEl.style.left = fatcat.x + "px";
-        fatcatEl.style.top = fatcat.y + "px";
-        fatcatEl.style.transform = dx > 0 ? 'scaleX(1)' : 'scaleX(-1)'; // flip instantly
-    }
+    fatcatEl.style.left = fatcat.x + "px";
+    fatcatEl.style.top = fatcat.y + "px";
+    fatcatEl.style.transform = dx > 0 ? 'scaleX(1)' : 'scaleX(-1)';
 
     // --- Check collision with cheese ---
-    if (cheese.active) {
-        const mousePadding = 20;
-        const cheesePadding = 10;
-        if (
-            mouse.x + mousePadding < cheese.x + 100 - cheesePadding &&
-            mouse.x + 100 - mousePadding > cheese.x + cheesePadding &&
-            mouse.y + mousePadding < cheese.y + 100 - cheesePadding &&
-            mouse.y + 100 - mousePadding > cheese.y + cheesePadding
-        ) {
-            score += 100;
-            if (scoreboard) scoreboard.textContent = "CHEESE: " + score;
-            eatCheeseSound.currentTime = 0;
-            eatCheeseSound.play();
-            cheese.active = false;
-            if (cheeseEl) cheeseEl.classList.add('hidden');
-            spawnCheese();
-        }
+    const mousePadding = 20;
+    const cheesePadding = 10;
+
+    if (cheese.active &&
+        mouse.x + mousePadding < cheese.x + 100 - cheesePadding &&
+        mouse.x + 100 - mousePadding > cheese.x + cheesePadding &&
+        mouse.y + mousePadding < cheese.y + 100 - cheesePadding &&
+        mouse.y + 100 - mousePadding > cheese.y + cheesePadding
+    ) {
+        score += 100;
+        scoreboard.textContent = "CHEESE: " + score;
+        eatCheeseSound.currentTime = 0;
+        eatCheeseSound.play();
+        cheese.active = false;
+        cheeseEl.classList.add('hidden');
+        spawnCheese();
     }
 
     // --- Check collision with fatcat ---
-    const mousePadding = 20;
     const fatcatPadding = 30;
     if (
         mouse.x + mousePadding < fatcat.x + 200 - fatcatPadding &&
@@ -179,7 +169,6 @@ window.addEventListener('mousemove', (e) => {
     if (!gameRunning) return;
 
     let dx = e.clientX - (mouse.x + 50);
-    mouse.dy = e.clientY - (mouse.y + 50);
 
     mouse.x = e.clientX - 50;
     mouse.y = e.clientY - 50;
@@ -190,12 +179,13 @@ window.addEventListener('mousemove', (e) => {
 });
 
 // =====================
-// Start & Restart with Space
+// Start / Restart with Space
 // =====================
 window.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
-        if (startScreen.classList.contains('hidden') && endScreen.classList.contains('hidden')) return;
-        startGame();
+        if (!startScreen.classList.contains('hidden') || !endScreen.classList.contains('hidden')) {
+            startGame();
+        }
     }
 });
 
@@ -206,4 +196,3 @@ window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 });
-
