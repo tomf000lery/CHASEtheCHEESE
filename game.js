@@ -40,11 +40,10 @@ let fatcat = { x: 400, y: 300 };
 let cheese = { x: 0, y: 0, active: false };
 
 // =====================
-// Entities (using <img> to keep GIFs animated)
+// Entities (GIFs controlled via JS)
 // =====================
 let mouseEl, fatcatEl, cheeseEl;
 
-// Create image elements when DOM is ready
 window.addEventListener('DOMContentLoaded', () => {
     mouseEl = document.createElement('img');
     mouseEl.id = 'mouse';
@@ -104,7 +103,7 @@ function startGame() {
 }
 
 // =====================
-// Spawn Cheese (only 1 at a time)
+// Spawn Cheese
 // =====================
 function spawnCheese() {
     if (!gameRunning || cheese.active) return;
@@ -129,11 +128,11 @@ function gameLoop() {
         mouseEl.style.left = mouse.x + "px";
         mouseEl.style.top = mouse.y + "px";
 
-        // Flip only when moving right; else default left
+        // Corrected flip: now right = look right
         if (mouse.x > mouse.prevX) {
-            mouseEl.style.transform = 'scaleX(-1)'; // moving right
+            mouseEl.style.transform = 'scaleX(1)'; // moving right
         } else {
-            mouseEl.style.transform = 'scaleX(1)'; // default left
+            mouseEl.style.transform = 'scaleX(-1)'; // moving left
         }
         mouse.prevX = mouse.x;
     }
@@ -141,26 +140,25 @@ function gameLoop() {
     // --- Move Fatcat towards mouse ---
     let dx = mouse.x - fatcat.x;
     let dy = mouse.y - fatcat.y;
-    let dist = Math.sqrt(dx * dx + dy * dy);
-    let speed = 2 + score / 500; // faster with more cheese
-    fatcat.x += (dx / dist) * speed;
-    fatcat.y += (dy / dist) * speed;
+    let dist = Math.sqrt(dx*dx + dy*dy);
+    let speed = 2 + score/500;
+    fatcat.x += (dx/dist)*speed;
+    fatcat.y += (dy/dist)*speed;
 
     if (fatcatEl) {
         fatcatEl.style.left = fatcat.x + "px";
         fatcatEl.style.top = fatcat.y + "px";
-        fatcatEl.style.transform = dx > 0 ? 'scaleX(1)' : 'scaleX(-1)'; // flip instantly
+        fatcatEl.style.transform = dx > 0 ? 'scaleX(1)' : 'scaleX(-1)';
     }
 
-    // --- Check collision with cheese (precise hitbox) ---
+    // --- Cheese collision ---
     if (cheese.active) {
-        const mousePadding = 20;
-        const cheesePadding = 10;
+        const mp = 20, cp = 10;
         if (
-            mouse.x + mousePadding < cheese.x + 100 - cheesePadding &&
-            mouse.x + 100 - mousePadding > cheese.x + cheesePadding &&
-            mouse.y + mousePadding < cheese.y + 100 - cheesePadding &&
-            mouse.y + 100 - mousePadding > cheese.y + cheesePadding
+            mouse.x+mp < cheese.x+100-cp &&
+            mouse.x+100-mp > cheese.x+cp &&
+            mouse.y+mp < cheese.y+100-cp &&
+            mouse.y+100-mp > cheese.y+cp
         ) {
             score += 100;
             if (scoreboard) scoreboard.textContent = "CHEESE: " + score;
@@ -172,14 +170,13 @@ function gameLoop() {
         }
     }
 
-    // --- Check collision with fatcat (precise hitbox) ---
-    const mousePadding = 20;
-    const fatcatPadding = 30;
+    // --- Fatcat collision ---
+    const mp = 20, fp = 30;
     if (
-        mouse.x + mousePadding < fatcat.x + 200 - fatcatPadding &&
-        mouse.x + 100 - mousePadding > fatcat.x + fatcatPadding &&
-        mouse.y + mousePadding < fatcat.y + 200 - fatcatPadding &&
-        mouse.y + 100 - mousePadding > fatcat.y + fatcatPadding
+        mouse.x+mp < fatcat.x+200-fp &&
+        mouse.x+100-mp > fatcat.x+fp &&
+        mouse.y+mp < fatcat.y+200-fp &&
+        mouse.y+100-mp > fatcat.y+fp
     ) {
         endGame();
         return;
@@ -206,28 +203,28 @@ function endGame() {
 // =====================
 // Mouse Movement
 // =====================
-window.addEventListener('mousemove', (e) => {
+window.addEventListener('mousemove', (e)=>{
     if (!gameRunning) return;
     mouse.dx = e.clientX - mouse.x;
     mouse.dy = e.clientY - mouse.y;
-    mouse.x = e.clientX - 50; // offset for bigger mouse
+    mouse.x = e.clientX - 50;
     mouse.y = e.clientY - 50;
 });
 
 // =====================
-// Start & Restart with Space
+// Start / Restart
 // =====================
-window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') {
-        if (startScreen.classList.contains('hidden') && endScreen.classList.contains('hidden')) return;
+window.addEventListener('keydown',(e)=>{
+    if (e.code==='Space'){
+        if(startScreen.classList.contains('hidden') && endScreen.classList.contains('hidden')) return;
         startGame();
     }
 });
 
 // =====================
-// Handle Window Resize
+// Resize
 // =====================
-window.addEventListener('resize', () => {
+window.addEventListener('resize', ()=>{
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 });
