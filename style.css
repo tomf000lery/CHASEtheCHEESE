@@ -10,7 +10,7 @@ body, html {
     height: 100%;
     overflow: hidden;
     background: black;
-    cursor: none; /* hide the computer mouse cursor */
+    cursor: none; /* hide computer mouse */
 }
 
 /* Screens */
