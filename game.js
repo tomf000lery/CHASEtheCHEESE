@@ -11,18 +11,23 @@ canvas.height = window.innerHeight;
 
 // Assets
 const mouseImg = new Image();
-mouseImg.src = 'assets/mouse.gif';
+mouseImg.src = 'mouse.gif';
 
 const fatcatImg = new Image();
-fatcatImg.src = 'assets/fatcat.gif';
+fatcatImg.src = 'fatcat.gif';
 
 const cheeseImg = new Image();
-cheeseImg.src = 'assets/cheese.gif';
+cheeseImg.src = 'cheese.gif';
 
-const eatCheeseSound = new Audio('assets/eat_cheese.mp3');
-const loseSound = new Audio('assets/lose.mp3');
-const soundtrack = new Audio('assets/soundtrack.mp3');
+const eatCheeseSound = new Audio('eat_cheese.mp3');
+const loseSound = new Audio('lose.mp3');
+const soundtrack = new Audio('soundtrack.mp3');
 soundtrack.loop = true;
+
+// Start / End screen backgrounds
+document.querySelector('#start-screen .background').src = 'background_start.png';
+document.querySelector('#end-screen .background').src = 'xbackground_end.png';
+
 
 // Game State
 let gameRunning = false;
