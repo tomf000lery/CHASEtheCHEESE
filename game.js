@@ -6,7 +6,6 @@ const gameScreen = document.getElementById('game-screen');
 const endScreen = document.getElementById('end-screen');
 const finalScoreEl = document.getElementById('final-score');
 const scoreboard = document.getElementById('scoreboard');
-
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 
@@ -33,42 +32,18 @@ let gameRunning = false;
 let score = 0;
 
 // Mouse
-let mouse = { x: 100, y: 100, dx: 0, dy: 0, lastDirection: -1 }; // -1 = left, 1 = right
+let mouse = { x: 100, y: 100, dx: 0, dy: 0, lastDirection: 1 };
 // Fatcat
 let fatcat = { x: 400, y: 300 };
 // Cheese
 let cheese = { x: 0, y: 0, active: false };
 
 // =====================
-// Entities (GIFs controlled via JS)
+// Entities (GIFs as <img>)
 // =====================
-let mouseEl, fatcatEl, cheeseEl;
-
-window.addEventListener('DOMContentLoaded', () => {
-    mouseEl = document.createElement('img');
-    mouseEl.id = 'mouse';
-    mouseEl.src = 'mouse.gif';
-    mouseEl.classList.add('game-entity');
-    mouseEl.style.width = '100px';
-    mouseEl.style.height = '100px';
-    gameScreen.appendChild(mouseEl);
-
-    fatcatEl = document.createElement('img');
-    fatcatEl.id = 'fatcat';
-    fatcatEl.src = 'fatcat.gif';
-    fatcatEl.classList.add('game-entity');
-    fatcatEl.style.width = '200px';
-    fatcatEl.style.height = '200px';
-    gameScreen.appendChild(fatcatEl);
-
-    cheeseEl = document.createElement('img');
-    cheeseEl.id = 'cheese';
-    cheeseEl.src = 'cheese.gif';
-    cheeseEl.classList.add('game-entity', 'hidden');
-    cheeseEl.style.width = '100px';
-    cheeseEl.style.height = '100px';
-    gameScreen.appendChild(cheeseEl);
-});
+let mouseEl = document.getElementById('mouse');
+let fatcatEl = document.getElementById('fatcat');
+let cheeseEl = document.getElementById('cheese');
 
 // =====================
 // Start Game
@@ -77,12 +52,12 @@ function startGame() {
     score = 0;
     if (scoreboard) scoreboard.textContent = "CHEESE: 0";
 
-    mouse.x = canvas.width / 2;
-    mouse.y = canvas.height / 2;
-    mouse.lastDirection = -1; // start facing left
+    mouse.x = canvas.width / 2 - 50;
+    mouse.y = canvas.height / 2 - 50;
+    mouse.lastDirection = 1;
 
-    fatcat.x = Math.random() * canvas.width;
-    fatcat.y = Math.random() * canvas.height;
+    fatcat.x = Math.random() * (canvas.width - 200);
+    fatcat.y = Math.random() * (canvas.height - 200);
 
     cheese.active = false;
     if (cheeseEl) cheeseEl.classList.add('hidden');
@@ -105,9 +80,11 @@ function startGame() {
 // =====================
 function spawnCheese() {
     if (!gameRunning || cheese.active) return;
+
     cheese.x = Math.random() * (canvas.width - 100);
     cheese.y = Math.random() * (canvas.height - 100);
     cheese.active = true;
+
     if (cheeseEl) {
         cheeseEl.style.left = cheese.x + "px";
         cheeseEl.style.top = cheese.y + "px";
@@ -125,33 +102,34 @@ function gameLoop() {
     if (mouseEl) {
         mouseEl.style.left = mouse.x + "px";
         mouseEl.style.top = mouse.y + "px";
-
-        // Flip based on lastDirection only (persists until direction changes)
-        mouseEl.style.transform = `scaleX(${mouse.lastDirection})`;
+        mouseEl.style.transform = `scaleX(${mouse.lastDirection})`; // flip persists
     }
 
     // --- Move Fatcat towards mouse ---
     let dx = mouse.x - fatcat.x;
     let dy = mouse.y - fatcat.y;
-    let dist = Math.sqrt(dx*dx + dy*dy);
-    let speed = 2 + score/500;
-    fatcat.x += (dx/dist)*speed;
-    fatcat.y += (dy/dist)*speed;
+    let dist = Math.sqrt(dx * dx + dy * dy);
+    let speed = 2 + score / 500; // faster with more cheese
+    if (dist !== 0) {
+        fatcat.x += (dx / dist) * speed;
+        fatcat.y += (dy / dist) * speed;
+    }
 
     if (fatcatEl) {
         fatcatEl.style.left = fatcat.x + "px";
         fatcatEl.style.top = fatcat.y + "px";
-        fatcatEl.style.transform = dx > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+        fatcatEl.style.transform = dx > 0 ? 'scaleX(1)' : 'scaleX(-1)'; // flip instantly
     }
 
-    // --- Cheese collision ---
+    // --- Check collision with cheese ---
     if (cheese.active) {
-        const mp = 20, cp = 10;
+        const mousePadding = 20;
+        const cheesePadding = 10;
         if (
-            mouse.x+mp < cheese.x+100-cp &&
-            mouse.x+100-mp > cheese.x+cp &&
-            mouse.y+mp < cheese.y+100-cp &&
-            mouse.y+100-mp > cheese.y+cp
+            mouse.x + mousePadding < cheese.x + 100 - cheesePadding &&
+            mouse.x + 100 - mousePadding > cheese.x + cheesePadding &&
+            mouse.y + mousePadding < cheese.y + 100 - cheesePadding &&
+            mouse.y + 100 - mousePadding > cheese.y + cheesePadding
         ) {
             score += 100;
             if (scoreboard) scoreboard.textContent = "CHEESE: " + score;
@@ -163,13 +141,14 @@ function gameLoop() {
         }
     }
 
-    // --- Fatcat collision ---
-    const mp = 20, fp = 30;
+    // --- Check collision with fatcat ---
+    const mousePadding = 20;
+    const fatcatPadding = 30;
     if (
-        mouse.x+mp < fatcat.x+200-fp &&
-        mouse.x+100-mp > fatcat.x+fp &&
-        mouse.y+mp < fatcat.y+200-fp &&
-        mouse.y+100-mp > fatcat.y+fp
+        mouse.x + mousePadding < fatcat.x + 200 - fatcatPadding &&
+        mouse.x + 100 - mousePadding > fatcat.x + fatcatPadding &&
+        mouse.y + mousePadding < fatcat.y + 200 - fatcatPadding &&
+        mouse.y + 100 - mousePadding > fatcat.y + fatcatPadding
     ) {
         endGame();
         return;
@@ -196,32 +175,34 @@ function endGame() {
 // =====================
 // Mouse Movement
 // =====================
-window.addEventListener('mousemove', (e)=>{
+window.addEventListener('mousemove', (e) => {
     if (!gameRunning) return;
-    mouse.dx = e.clientX - mouse.x;
-    mouse.dy = e.clientY - mouse.y;
+
+    let dx = e.clientX - (mouse.x + 50);
+    mouse.dy = e.clientY - (mouse.y + 50);
+
     mouse.x = e.clientX - 50;
     mouse.y = e.clientY - 50;
 
-    // Update lastDirection **only when moving left or right**
-    if (mouse.dx > 0) mouse.lastDirection = -1; // moving right, flip (since original gif faces left)
-    else if (mouse.dx < 0) mouse.lastDirection = 1; // moving left, flip back
+    // Only flip when moving right or left, persists until changed
+    if (dx > 0) mouse.lastDirection = -1; // moving right → flip horizontally
+    else if (dx < 0) mouse.lastDirection = 1; // moving left → default
 });
 
 // =====================
-// Start / Restart
+// Start & Restart with Space
 // =====================
-window.addEventListener('keydown',(e)=>{
-    if (e.code==='Space'){
-        if(startScreen.classList.contains('hidden') && endScreen.classList.contains('hidden')) return;
+window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+        if (startScreen.classList.contains('hidden') && endScreen.classList.contains('hidden')) return;
         startGame();
     }
 });
 
 // =====================
-// Resize
+// Handle Window Resize
 // =====================
-window.addEventListener('resize', ()=>{
+window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 });
